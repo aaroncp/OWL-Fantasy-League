@@ -1,0 +1,146 @@
+function onOpen() {
+  //sub sub menus
+  var weeklyName = SpreadsheetApp.getUi().createMenu('Name')
+                          .addItem('Ascending', 'sortAscWeekName')
+                          .addItem('Descending', 'sortDescWeekName');
+  var weeklyScore = SpreadsheetApp.getUi().createMenu('Score')
+                          .addItem('Ascending', 'sortAscWeekScore')
+                          .addItem('Descending', 'sortDescWeekScore');
+  var weeklyRole = SpreadsheetApp.getUi().createMenu('Role')
+                          .addItem('Ascending', 'sortAscWeekRole')
+                          .addItem('Descending', 'sortDescWeekRole');
+  var weeklyTeam = SpreadsheetApp.getUi().createMenu('Team')
+                          .addItem('Ascending', 'sortAscWeekTeam')
+                          .addItem('Descending', 'sortDescWeekTeam');
+  var playerName = SpreadsheetApp.getUi().createMenu('Name')
+                          .addItem('Ascending', 'sortAscPlayerName')
+                          .addItem('Descending', 'sortDescPlayerName');
+  var playerRole = SpreadsheetApp.getUi().createMenu('Role')
+                          .addItem('Ascending', 'sortAscPlayerRole')
+                          .addItem('Descending', 'sortDescPlayerRole');  
+  var playerTeam = SpreadsheetApp.getUi().createMenu('Team')
+                          .addItem('Ascending', 'sortAscPlayerTeam')
+                          .addItem('Descending', 'sortDescPlayerTeam');
+  var playerCost = SpreadsheetApp.getUi().createMenu('Fantasy Cost')
+                          .addItem('Ascending', 'sortAscPlayerCost')
+                          .addItem('Descending', 'sortDescPlayerCost');
+  var playerMaps = SpreadsheetApp.getUi().createMenu('Maps Played')
+                          .addItem('Ascending', 'sortAscPlayerMaps')
+                          .addItem('Descending', 'sortDescPlayerMaps');
+  var playerAvgWeek = SpreadsheetApp.getUi().createMenu('Avg/Week')
+                          .addItem('Ascending', 'sortAscPlayerAvgWeek')
+                          .addItem('Descending', 'sortDescPlayerAvgWeek');
+  var playerAvgMap = SpreadsheetApp.getUi().createMenu('Avg/Map')
+                          .addItem('Ascending', 'sortAscPlayerAvgMap')
+                          .addItem('Descending', 'sortDescPlayerAvgMap');
+  //sub menus
+  var playerSheet = SpreadsheetApp.getUi().createMenu('Player Info')
+                          .addSubMenu(playerName)
+                          .addSubMenu(playerRole)
+                          .addSubMenu(playerTeam)
+                          .addSubMenu(playerCost)
+                          .addSubMenu(playerMaps)
+                          .addSubMenu(playerAvgWeek)
+                          .addSubMenu(playerAvgMap);
+  var weeklySheets = SpreadsheetApp.getUi().createMenu('Weekly Scores')
+                          .addSubMenu(weeklyName)
+                          .addSubMenu(weeklyScore)
+                          .addSubMenu(weeklyRole)
+                          .addSubMenu(weeklyTeam);
+  //menu
+  var topMenu = SpreadsheetApp.getUi().createMenu('Sort Data')
+                          .addSubMenu(playerSheet)
+                          .addSubMenu(weeklySheets);
+  topMenu.addToUi();
+}
+
+function sortWeeks(cellName, isAscending) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sortColumn = ss.getRange(cellName);
+  //if active sheet is one of the week score sheets
+  //get range starting with 3rd row and 1st column and ending with last row that contains data and the 5th column
+  //then sort based on the passed arguments
+  if(ss.getName() != "Score Summary" && ss.getName() != "Player Info" && ss.getName() != "Graphs" && ss.getName() != "Valuation"){  
+    ss.getRange(3, 1, ss.getLastRow(), 5).sort({column: sortColumn.getColumn(), ascending: isAscending});
+  }
+}
+
+function sortPlayers(cellName, isAscending) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sortColumn = ss.getRange(cellName);
+  //if active sheet is player info
+  //get range starting with 2nd row and 1st column and ending with last row and the last column containing data
+  //then sort based on the passed arguments
+  if(ss.getName() == "Player Info"){    
+    ss.getRange(2, 1, ss.getLastRow(), 35).sort({column: sortColumn.getColumn(), ascending: isAscending});
+  }
+}
+
+//separate function for each sub sub menu item
+//pass in a cell of the column the range should be sorted by, and boolean for ascending or descending
+function sortAscWeekName(){
+  sortWeeks('A1', true);
+}
+function sortDescWeekName(){
+  sortWeeks('A1', false);
+}
+function sortAscWeekScore(){
+  sortWeeks('B1', true);
+}
+function sortDescWeekScore(){
+  sortWeeks('B1', false);
+}
+function sortAscWeekRole(){
+  sortWeeks('D1', true);
+}
+function sortDescWeekRole(){
+  sortWeeks('D1', false);
+}
+function sortAscWeekTeam(){
+  sortWeeks('E1', true);
+}
+function sortDescWeekTeam(){
+  sortWeeks('E1', false);
+}
+function sortAscPlayerName(){
+  sortPlayers('A1', true);
+}
+function sortDescPlayerName(){
+  sortPlayers('A1', false);
+}
+function sortAscPlayerRole(){
+  sortPlayers('B1', true);
+}
+function sortDescPlayerRole(){
+  sortPlayers('B1', false);
+}
+function sortAscPlayerTeam(){
+  sortPlayers('C1', true);
+}
+function sortDescPlayerTeam(){
+  sortPlayers('C1', false);
+}
+function sortAscPlayerCost(){
+  sortPlayers('D1', true);
+}
+function sortDescPlayerCost(){
+  sortPlayers('D1', false);
+}
+function sortAscPlayerMaps(){
+  sortPlayers('E1', true);
+}
+function sortDescPlayerMaps(){
+  sortPlayers('E1', false);
+}
+function sortAscPlayerAvgWeek(){
+  sortPlayers('F1', true);
+}
+function sortDescPlayerAvgWeek(){
+  sortPlayers('F1', false);
+}
+function sortAscPlayerAvgMap(){
+  sortPlayers('G1', true);
+}
+function sortDescPlayerAvgMap(){
+  sortPlayers('G1', false);
+}

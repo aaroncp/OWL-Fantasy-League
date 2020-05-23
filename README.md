@@ -3,4 +3,4 @@ This is a script that pulls csv files weekly from the official Overwatch League 
 
 The spreadsheet itself does a number of useful things for the league.  Each person participating in the league can create a team for each week.  Once the script is run in a given week, it will automatically calculate each person's team fantasy score.  Participants can also predict who is going to win each match for any given weekend, and a score will automatically tally for correct guesses.  A fantasy cost is also generated that incorporates both a player's average score and how likely they are to play.
 
-Both weekly sheets and Player Info can be sorted by a variety of columns using the 'Sort Data' menu I added to the sheet.  I have included that google sheets script as 'Sort Sheet Script'.
+Both weekly sheets and Player Info can be sorted by a variety of columns using the 'Sort Data' menu I added to the sheet.  I have included the google sheets script that adds that menu item and sorts the information as 'Sort Sheet Script'.

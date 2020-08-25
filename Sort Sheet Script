@@ -53,6 +53,18 @@ function onOpen() {
                           .addSubMenu(weeklySheets);
   topMenu.addToUi();
 }
+//get last row of the first column
+function getLastRowSpecial(range){
+  var rowNum = 0;
+  for(var row = 0; row < range.length; row++){
+ 
+    if(range[row][0] === ""){
+      rowNum = row;
+      break;
+    };
+  };
+  return rowNum;
+};
 
 function sortWeeks(cellName, isAscending) {
   var ss = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
@@ -60,8 +72,9 @@ function sortWeeks(cellName, isAscending) {
   //if active sheet is one of the week score sheets
   //get range starting with 3rd row and 1st column and ending with last row that contains data and the 5th column
   //then sort based on the passed arguments
-  if(ss.getName() != "Score Summary" && ss.getName() != "Player Info" && ss.getName() != "Graphs" && ss.getName() != "Valuation"){  
-    ss.getRange(3, 1, ss.getLastRow(), 5).sort({column: sortColumn.getColumn(), ascending: isAscending});
+  var columnToCheck = ss.getRange("A3:A").getValues();
+  if(ss.getName().indexOf('Week')>-1){  
+    ss.getRange(3, 1, getLastRowSpecial(columnToCheck), 5).sort([{column: sortColumn.getColumn(), ascending: isAscending},{column: 2, ascending: false}]);
   }
 }
 
@@ -70,9 +83,9 @@ function sortPlayers(cellName, isAscending) {
   var sortColumn = ss.getRange(cellName);
   //if active sheet is player info
   //get range starting with 2nd row and 1st column and ending with last row and the last column containing data
-  //then sort based on the passed arguments
+  //then sort based on the passed arguments with Fantasy Cost as secondary sort criteria
   if(ss.getName() == "Player Info"){    
-    ss.getRange(2, 1, ss.getLastRow(), 35).sort({column: sortColumn.getColumn(), ascending: isAscending});
+    ss.getRange(2, 1, ss.getLastRow(), 35).sort([{column: sortColumn.getColumn(), ascending: isAscending},{column: 4, ascending: false}]);
   }
 }
 

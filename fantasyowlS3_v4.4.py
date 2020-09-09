@@ -57,7 +57,7 @@ PLAYER_STATS_CSV_FILE_PATH = 'C:/Users/aaron/Downloads/phs_2020/phs_2020_2.csv'
 
 UNZIPPED_MATCH_STATS_DIR = 'C:/Users/aaron/Downloads/match_map_stats'
 MATCH_STATS_ZIP_FILE_PATH = 'C:/Users/aaron/Downloads/match_map_stats.zip'
-MATCH_STATS_CSV_FILE_PATH = 'C:/Users/aaron/Downloads/match_map_stats/match_map_csv.csv'
+MATCH_STATS_CSV_FILE_PATH = 'C:/Users/aaron/Downloads/match_map_stats/match_map_stats.csv'
 
 class Player:
     def __init__(self,name):
@@ -232,7 +232,7 @@ def getPlayerMatchCSVUrl():
     for word in stringList:
         if 'phs_2020' in word:
             Stage1PlayerUrl = word
-        elif 'match_map_csv' in word:
+        elif 'match_map_stats' in word:
             Stage1MatchUrl = word
 
     #edit the returned strings to contain no extra leading or trailing characters

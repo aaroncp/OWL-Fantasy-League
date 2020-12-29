@@ -5,28 +5,6 @@ Created on Thu Feb 13 19:43:23 2020
 @author: acp
 """
 
-#v1: add ability to read row date and only take in data from past week
-#v1.1-1.2: comment the code
-#v1.3: give each player their own dataframe with all rows from the csv that pertain to them
-#   separate findMaps function no longer necessary
-#   simplify removal of duplicates
-#v2 download csv from statslab instead of put in as an argument
-#v2.1 made folder/file paths global variables for ease of use
-#v2.2 made script consistent in use of single over double quotes
-#v2.3 combined scripts into 1 file
-#v3 can now run main() on a scheduled interval
-#V3.1 used proper convention for global variable naming
-#V3.2 combined downloadMatchData and downloadPlayerData for ease
-#v4 data autmatically formatted and entered into spreadsheet
-#v4.1  script now properly finds the csv links on the statslab webpage rather than having hardcoded values
-#v4.2 fixed behavior around player having played the same map twice in a weekend
-#v4.3 changed file names to match changes on the OWL website
-#v4.4 now correctly calculates winner match scores in the event of matches longer than first to 3 format
-
-#requires pip installs of oauth2client, google-api-python-client, google-auth-httplib2, google-auth-oauthlib,
-#   schedule, pandas, numpy, beautifulsoup4, wget
-#also requires following step 1 here: https://developers.google.com/sheets/api/quickstart/python
-
 import sys
 import numpy as np
 import pandas as pd
@@ -35,6 +13,7 @@ import shutil, os
 from zipfile import ZipFile
 
 #HTML parsing imports
+import requests
 from html.parser import HTMLParser
 import urllib.request as urllib2
 from bs4 import BeautifulSoup
@@ -61,23 +40,21 @@ MATCH_STATS_CSV_FILE_PATH = 'C:/Users/aaron/Downloads/match_map_stats/match_map_
 
 class Player:
     def __init__(self,name):
-        #create and initialize(assign value to) all class variables
         self.name          = name
         self.eliminations  = None
         self.totalDamage   = None
         self.healing       = None
         self.allPlayerData = pd.DataFrame()
         self.numOfMaps     = 0        
-        self.elimFactor    = 0.5
+        self.elimsFactor   = 1
+        self.deathsFactor   = .5 
         self.damageFactor  = 0.001
         self.healingFactor = 0.001        
         
     def allocateStats(self):
-        statName = ['Eliminations','All Damage Done','Healing Done']
-        elims,damage,healing = None,None,None
-        elimList    = []
-        damageList  = []
-        healingList = []
+        statName = ['Eliminations','Damage Done','Healing Done','Deaths']
+        elims,damage,healing,deaths = None,None,None,None
+        elimsList, damageList, healingList, deathsList = [],[],[],[]
 
         #new dataframe of rows with unique date and map name
         uniqueDateMapDF = self.allPlayerData.drop_duplicates(subset=['start_time','map_name'])
@@ -95,30 +72,34 @@ class Player:
                     elif statName[1] == row.stat_name and 'All Heroes' == row.hero_name: #damage
                         damage  = float(row.stat_amount)
                     elif statName[2] == row.stat_name and 'All Heroes' == row.hero_name: #healing
-                        healing = float(row.stat_amount)                        
+                        healing = float(row.stat_amount)
+                    elif statName[3] == row.stat_name and 'All Heroes' == row.hero_name: #deaths
+                        deaths = float(row.stat_amount)                            
             #If elims/damage/healing was stored (not None), append to list
             if elims != None:
-                elimList.append(elims)
+                elimsList.append(elims)
             else:
-                elimList.append(0)
-                
+                elimsList.append(0)                
             if damage != None:
                 damageList.append(damage)
             else:
-                damageList.append(0)
-                
+                damageList.append(0)                
             if healing != None:
                 healingList.append(healing)
             else:
                 healingList.append(0)
-            elims,damage,healing = None,None,None       
+            if deaths != None:
+                deathsList.append(deaths)
+            else:
+                deathsList.append(0)
+            elims,damage,healing,deaths = None,None,None,None       
         
         #Sum elim,damage, and healing scores and sort in descending order
         #zip allows you to associate elements in multiple lists based on their index.  So the result would be
         #[(elimList[1], damageList[1],healingList[1]),(elimList[2]...)]
         #i,j,k then cooresponds to the 3 values in each row for the purposes of iterating over the zipped list to create a new list
         #that totals all points for each map
-        self.pointList =[j*self.elimFactor+k*self.damageFactor+l*self.healingFactor for j,k,l in zip(elimList,damageList,healingList)]        
+        self.pointList =[j*self.elimsFactor+k*self.damageFactor+l*self.healingFactor+m*self.deathsFactor for j,k,l,m in zip(elimsList,damageList,healingList,deathsList)]        
         self.pointList.sort(reverse = True)
 
         #Take top three scoring entries and round values to 2 decimal places
@@ -223,8 +204,8 @@ def getPlayerMatchCSVUrl():
     Stage1MatchUrl = ''
 
     #open and parse the html
-    html_page = urllib2.urlopen(STATS_LAB_URL)
-    soup = BeautifulSoup(html_page, 'html.parser')
+    html_page = requests.get(STATS_LAB_URL)
+    soup = BeautifulSoup(html_page.text, features='html.parser')
     prettyStr = str(soup.prettify())
 
     #look through the html for the links cooresponding to match and player data
@@ -292,7 +273,8 @@ def getSheetsAPI():
     service = build('sheets', 'v4', credentials=creds)
 
     # Call the Sheets API
-    sheet = service.spreadsheets()
+    # pylint: disable=maybe-no-member
+    sheet = service.spreadsheets()    
     return sheet
 
 def insertDataInSheet(playerResults, matchResults, sheet):

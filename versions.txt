@@ -1,0 +1,17 @@
+#v1: add ability to read row date and only take in data from past week
+#v1.1-1.2: comment the code
+#v1.3: give each player their own dataframe with all rows from the csv that pertain to them
+#   separate findMaps function no longer necessary
+#   simplify removal of duplicates
+#v2 download csv from statslab instead of put in as an argument
+#v2.1 made folder/file paths global variables for ease of use
+#v2.2 made script consistent in use of single over double quotes
+#v2.3 combined scripts into 1 file
+#v3 can now run main() on a scheduled interval
+#V3.1 used proper convention for global variable naming
+#V3.2 combined downloadMatchData and downloadPlayerData for ease
+#v4 data autmatically formatted and entered into spreadsheet
+#v4.1  script now properly finds the csv links on the statslab webpage rather than having hardcoded values
+#v4.2 fixed behavior around player having played the same map twice in a weekend
+#v4.3 changed file names to match changes on the OWL website
+#v4.4 now correctly calculates winner match scores in the event of matches longer than first to 3 format

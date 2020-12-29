@@ -15,3 +15,4 @@
 #v4.2 fixed behavior around player having played the same map twice in a weekend
 #v4.3 changed file names to match changes on the OWL website
 #v4.4 now correctly calculates winner match scores in the event of matches longer than first to 3 format
+#v4.5 splitting into separate files, adding in deaths to score calculation, and taking out shield damage

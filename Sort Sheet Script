@@ -24,24 +24,28 @@ function onOpen() {
   var playerCost = SpreadsheetApp.getUi().createMenu('Fantasy Cost')
                           .addItem('Ascending', 'sortAscPlayerCost')
                           .addItem('Descending', 'sortDescPlayerCost');
-  var playerMaps = SpreadsheetApp.getUi().createMenu('Maps Played')
-                          .addItem('Ascending', 'sortAscPlayerMaps')
-                          .addItem('Descending', 'sortDescPlayerMaps');
+  var playerPctMaps = SpreadsheetApp.getUi().createMenu('% of Maps Played')
+                          .addItem('Ascending', 'sortAscPlayerPctMaps')
+                          .addItem('Descending', 'sortDescPlayerPctMaps');
   var playerAvgWeek = SpreadsheetApp.getUi().createMenu('Avg/Week')
                           .addItem('Ascending', 'sortAscPlayerAvgWeek')
                           .addItem('Descending', 'sortDescPlayerAvgWeek');
   var playerAvgMap = SpreadsheetApp.getUi().createMenu('Avg/Map')
                           .addItem('Ascending', 'sortAscPlayerAvgMap')
                           .addItem('Descending', 'sortDescPlayerAvgMap');
+  var playerStdDev = SpreadsheetApp.getUi().createMenu('Std Dev')
+                          .addItem('Ascending', 'sortAscPlayerStdDev')
+                          .addItem('Descending', 'sortDescPlayerStdDev');
   //sub menus
   var playerSheet = SpreadsheetApp.getUi().createMenu('Player Info')
                           .addSubMenu(playerName)
                           .addSubMenu(playerRole)
                           .addSubMenu(playerTeam)
                           .addSubMenu(playerCost)
-                          .addSubMenu(playerMaps)
+                          .addSubMenu(playerPctMaps)
                           .addSubMenu(playerAvgWeek)
-                          .addSubMenu(playerAvgMap);
+                          .addSubMenu(playerAvgMap)
+                          .addSubMenu(playerStdDev);
   var weeklySheets = SpreadsheetApp.getUi().createMenu('Weekly Scores')
                           .addSubMenu(weeklyName)
                           .addSubMenu(weeklyScore)
@@ -53,7 +57,7 @@ function onOpen() {
                           .addSubMenu(weeklySheets);
   topMenu.addToUi();
 }
-//get last row of the first column
+
 function getLastRowSpecial(range){
   var rowNum = 0;
   for(var row = 0; row < range.length; row++){
@@ -139,10 +143,10 @@ function sortAscPlayerCost(){
 function sortDescPlayerCost(){
   sortPlayers('D1', false);
 }
-function sortAscPlayerMaps(){
+function sortAscPlayerPctMaps(){
   sortPlayers('E1', true);
 }
-function sortDescPlayerMaps(){
+function sortDescPlayerPctMaps(){
   sortPlayers('E1', false);
 }
 function sortAscPlayerAvgWeek(){
@@ -156,4 +160,10 @@ function sortAscPlayerAvgMap(){
 }
 function sortDescPlayerAvgMap(){
   sortPlayers('G1', false);
+}
+function sortAscPlayerStdDev(){
+  sortPlayers('H1', true);
+}
+function sortDescPlayerStdDev(){
+  sortPlayers('H1', false);
 }

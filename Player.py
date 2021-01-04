@@ -67,7 +67,7 @@ class Player:
       #[(elimList[1], damageList[1],healingList[1]),(elimList[2]...)]
       #i,j,k then cooresponds to the 3 values in each row for the purposes of iterating over the zipped list to create a new list
       #that totals all points for each map
-      self.pointList =[j*self.elimsFactor+k*self.damageFactor+l*self.healingFactor+m*self.deathsFactor for j,k,l,m in zip(elimsList,damageList,healingList,deathsList)]        
+      self.pointList =[j*self.elimsFactor+k*self.damageFactor+l*self.healingFactor-m*self.deathsFactor for j,k,l,m in zip(elimsList,damageList,healingList,deathsList)]        
       self.pointList.sort(reverse = True)
 
       #Take top three scoring entries and round values to 2 decimal places

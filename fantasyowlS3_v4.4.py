@@ -19,19 +19,16 @@ def main():
     WebScraping.downloadPlayerAndMatchData()
 
     #Put necessary columns from csv into dataframes
-    matchStats = pd.read_csv(Constant.MATCH_STATS_CSV_FILE_PATH, parse_dates=['round_start_time'], 
+    fullMatchStats = pd.read_csv(Constant.MATCH_STATS_CSV_FILE_PATH, parse_dates=['round_start_time'], 
         usecols = ['round_start_time', 'match_id', 'match_winner', 'map_loser','map_name', 'team_one_name', 'team_two_name'])
-    playerStats = pd.read_csv(Constant.PLAYER_STATS_CSV_FILE_PATH, parse_dates=['start_time'], 
+    fullPlayerStats = pd.read_csv(Constant.PLAYER_STATS_CSV_FILE_PATH, parse_dates=['start_time'], 
         usecols = ['start_time', 'map_name', 'player_name','stat_name', 'hero_name', 'stat_amount'])
 
-    #eliminate all data from the player/match dataframes that's older than 7 days
-    givenWeekendMatchDataTop = matchStats[matchStats['round_start_time']>(pd.to_datetime('now') - pd.DateOffset(days=7))]
-    #givenWeekendMatchDataBottom = givenWeekendMatchDataTop[givenWeekendMatchDataTop['round_start_time']>(pd.to_datetime('now') - pd.DateOffset(days=5))]
-    givenWeekendPlayerDataTop = playerStats[playerStats['start_time']>(pd.to_datetime('now') - pd.DateOffset(days=7))]
-    #givenWeekendPlayerDataBottom = givenWeekendPlayerDataTop[givenWeekendPlayerDataTop['start_time']>(pd.to_datetime('now') - pd.DateOffset(days=5))]
+    matchStats = purgeUnneededMatchData(fullMatchStats)
+    playerStats = purgeUnneededPlayerData(fullPlayerStats)
     
     #process the data and insert into google sheet
-    Gsheets.insertDataInSheet(loopPlayers(givenWeekendPlayerDataTop), loopMatches(givenWeekendMatchDataTop), Gsheets.getSheetsAPI())
+    Gsheets.insertDataInSheet(loopPlayers(playerStats), loopMatches(matchStats), Gsheets.getSheetsAPI())
         
 def loopPlayers(playersDF):
     #Create list of players that removes duplicates
@@ -53,7 +50,7 @@ def loopPlayers(playersDF):
         nameValue = {'player_name': [playerList[i]]}
         #both .any and .all work here, since there's only one value we're searching for per row
         player_row_mask = playersDF.isin(nameValue).any(1)
-        singlePlayerDF = playersDF[player_row_mask]
+        singlePlayerDF = playersDF[player_row_mask]       
         holder[playerList[i]].allPlayerData = singlePlayerDF
         holder[playerList[i]].allocateStats()
         playerResultsList.append(holder[playerList[i]].name + ',' + str(holder[playerList[i]].pointTotal) + ',' + str(holder[playerList[i]].numOfMaps))
@@ -87,6 +84,24 @@ def loopMatches(matchesDF):
             matchResultsList.append(holder[matchList[i]].winner + ',' + holder[matchList[i]].loser + ',' + str(holder[matchList[i]].winnerMapScore) + ' - ' + str(holder[matchList[i]].loserMapScore))
 
     return matchResultsList
+
+def purgeUnneededPlayerData(playersDF):
+    #drop rows with null values
+    playersDF = playersDF.dropna()
+    #eliminate all data from the player/match dataframes execept for what's in the given timeframe
+    playersDF = playersDF[playersDF['start_time']>(pd.to_datetime('now') - pd.DateOffset(days=146))]
+    playersDF = playersDF[playersDF['start_time']<(pd.to_datetime('now') - pd.DateOffset(days=139))]
+    #remove rows with stats not used for fantasy score
+    playersDF = playersDF[playersDF['stat_name'].isin(['Eliminations','Hero Damage Done','Healing Done','Deaths'])&~playersDF['hero_name'].isin(['All Heroes'])]
+    return playersDF
+
+def purgeUnneededMatchData(matchesDF):
+    #drop rows with null values
+    matchesDF = matchesDF.dropna()
+    #eliminate all data from the player/match dataframes execept for what's in the given timeframe
+    matchesDF = matchesDF[matchesDF['round_start_time']>(pd.to_datetime('now') - pd.DateOffset(days=146))]
+    matchesDF = matchesDF[matchesDF['round_start_time']<(pd.to_datetime('now') - pd.DateOffset(days=139))]
+    return matchesDF
 
 if __name__ == '__main__':
     #if script is running, run main() every Wednesday once the new data for the week has been published

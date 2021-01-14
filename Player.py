@@ -4,9 +4,6 @@ import pandas as pd
 class Player:
   def __init__(self,name):
       self.name          = name
-      self.eliminations  = None
-      self.totalDamage   = None
-      self.healing       = None
       self.allPlayerData = pd.DataFrame()
       self.numOfMaps     = 0        
       self.elimsFactor   = 1
@@ -15,34 +12,32 @@ class Player:
       self.healingFactor = 0.001        
       
   def allocateStats(self):
-      statName = ['Eliminations','Damage Done','Healing Done','Deaths']
+      statName = ['Eliminations','Hero Damage Done','Healing Done','Deaths']
       elims,damage,healing,deaths = None,None,None,None
       perMapPerHeroDFs = []
       elimsList, damageList, healingList, deathsList = [],[],[],[]
-
-      #new dataframe of rows with unique date and map name
+      #new dataframe of rows with unique date, map name, and hero (excluding 'all heroes')
       uniqueDateMapDF = self.allPlayerData.drop_duplicates(subset=['start_time','map_name'])
-      uniqueHeroesList = uniqueDateMapDF.hero_name.unique()
-      uniqueHeroesList = uniqueHeroesList.remove('All Heroes')
+      uniqueHeroesList = self.allPlayerData.hero_name.unique()
       uniqueDateMapList = uniqueDateMapDF.values.tolist()
-      self.numOfMaps = len(uniqueDateMapDF.index)
+      self.numOfMaps = len(uniqueDateMapDF.start_time.unique())
       
       #For each map
-      for i in range(len(uniqueDateMapList)):
+      for i in range(len(uniqueDateMapList)): #this is currently a longer list than it's supposed to be, because maps repeat for each hero played on that map
         heroStats = pd.DataFrame(columns=['hero', 'elims', 'damage', 'healing','deaths'])
         #for each unique hero played
         for j in range(len(uniqueHeroesList)):
           #For each row of data
           for row in self.allPlayerData.itertuples(index=False):
               #if row of data has stat we want(elims/damage/healing from statName), store stat in elims/damage/healing
-              if uniqueDateMapList[i][0] == row.start_time and uniqueDateMapList[i][1] == row.map_name:
-                  if statName[0] == row.stat_name and uniqueHeroesList[j] == row.hero_name: #elims
+              if uniqueDateMapList[i][0] == row.start_time and uniqueDateMapList[i][1] == row.map_name and uniqueHeroesList[j] == row.hero_name:
+                  if statName[0] == row.stat_name: #elims
                       elims   = float(row.stat_amount)
-                  elif statName[1] == row.stat_name and uniqueHeroesList[j] == row.hero_name: #damage
+                  elif statName[1] == row.stat_name: #damage
                       damage  = float(row.stat_amount)
-                  elif statName[2] == row.stat_name and uniqueHeroesList[j] == row.hero_name: #healing
+                  elif statName[2] == row.stat_name: #healing
                       healing = float(row.stat_amount)
-                  elif statName[3] == row.stat_name and uniqueHeroesList[j] == row.hero_name: #deaths
+                  elif statName[3] == row.stat_name: #deaths
                       deaths = float(row.stat_amount)                            
           #If elims/damage/healing was stored (not None), append to list
           if elims == None:
@@ -56,7 +51,7 @@ class Player:
           heroStats.loc[len(heroStats)] = [uniqueHeroesList[j],elims,damage,healing,deaths]
           elims,damage,healing,deaths = None,None,None,None
         perMapPerHeroDFs.append(heroStats)
-
+    
       for df in perMapPerHeroDFs:
         elimsList.append(df['elims'].sum())
         damageList.append(df['damage'].sum())
@@ -64,7 +59,7 @@ class Player:
         deathsList.append(df['deaths'].sum())
       #Sum elim,damage, and healing scores and sort in descending order
       #zip allows you to associate elements in multiple lists based on their index.  So the result would be
-      #[(elimList[1], damageList[1],healingList[1]),(elimList[2]...)]
+      #[(elimList[1], damageList[1],healingList[1],deathsList[1]),(elimList[2]...)]
       #i,j,k then cooresponds to the 3 values in each row for the purposes of iterating over the zipped list to create a new list
       #that totals all points for each map
       self.pointList =[j*self.elimsFactor+k*self.damageFactor+l*self.healingFactor-m*self.deathsFactor for j,k,l,m in zip(elimsList,damageList,healingList,deathsList)]        
